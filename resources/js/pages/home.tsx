@@ -1,5 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { type SharedData } from '@/types';
 import { Head, usePage, Link } from '@inertiajs/react';
@@ -15,7 +16,7 @@ const bungalows = [
     price: 100,
     description: 'us ut non a etiam mattis. Non est vestibulum eu elit nunc consequat. Nibh convallis hac eget vitae scelerisque vitae morbi tortor. Dignissim et mi justo lectus nisl massa. Ut aliquam pellentesque hendrerit iaculis ac sed condimentum vulputate. Elementum mauris id sollicitudin aliquam diam hendrerit. Laoreet ultrices tempor enim massa diam viverra. Felis a nec odio ipsum porta ac vel pharetra in. Dignissim consectetur tincidunt a eget arcu. Id pretium facilisis adipiscing nisl aliquet. Ipsum tristique at diam pellentesque platea massa. Feugiat suspendisse nam sollicitudin vitae neque nunc et varius donec. Sit quis blandit eget netus augue a mauris. Accumsan quam adipiscing massa justo enim eros eu duis. Pretium tristique arcu in feugiat arcu pellentesque.',
     facilities: ['WiFi', 'TV', 'Keuken', 'Badkamer', 'Terras'],
-    images: ['/mask-group.png', '/mask-group.png', '/mask-group.png'],
+    images: ['/mask-group.png', 'https://images.pexels.com/photos/7031607/pexels-photo-7031607.jpeg', 'https://images.pexels.com/photos/1438832/pexels-photo-1438832.jpeg'],
   },
   {
     id: 2,
@@ -26,7 +27,7 @@ const bungalows = [
     price: 120,
     description: 'us ut non a etiam mattis. Non est vestibulum eu elit nunc consequat. Nibh convallis hac eget vitae scelerisque vitae morbi tortor. Dignissim et mi justo lectus nisl massa. Ut aliquam pellentesque hendrerit iaculis ac sed condimentum vulputate. Elementum mauris id sollicitudin aliquam diam hendrerit. Laoreet ultrices tempor enim massa diam viverra. Felis a nec odio ipsum porta ac vel pharetra in. Dignissim consectetur tincidunt a eget arcu. Id pretium facilisis adipiscing nisl aliquet. Ipsum tristique at diam pellentesque platea massa. Feugiat suspendisse nam sollicitudin vitae neque nunc et varius donec. Sit quis blandit eget netus augue a mauris. Accumsan quam adipiscing massa justo enim eros eu duis. Pretium tristique arcu in feugiat arcu pellentesque.',
     facilities: ['WiFi', 'TV', 'Keuken', 'Badkamer', 'Terras'],
-    images: ['/mask-group-1.png', '/mask-group-1.png', '/mask-group-1.png'],
+    images: ['/mask-group-1.png', 'https://images.pexels.com/photos/1438832/pexels-photo-1438832.jpeg', 'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg'],
   },
   {
     id: 3,
@@ -37,11 +38,11 @@ const bungalows = [
     price: 150,
     description: 'us ut non a etiam mattis. Non est vestibulum eu elit nunc consequat. Nibh convallis hac eget vitae scelerisque vitae morbi tortor. Dignissim et mi justo lectus nisl massa. Ut aliquam pellentesque hendrerit iaculis ac sed condimentum vulputate. Elementum mauris id sollicitudin aliquam diam hendrerit. Laoreet ultrices tempor enim massa diam viverra. Felis a nec odio ipsum porta ac vel pharetra in. Dignissim consectetur tincidunt a eget arcu. Id pretium facilisis adipiscing nisl aliquet. Ipsum tristique at diam pellentesque platea massa. Feugiat suspendisse nam sollicitudin vitae neque nunc et varius donec. Sit quis blandit eget netus augue a mauris. Accumsan quam adipiscing massa justo enim eros eu duis. Pretium tristique arcu in feugiat arcu pellentesque.',
     facilities: ['WiFi', 'TV', 'Keuken', 'Badkamer', 'Terras'],
-    images: ['/mask-group-2.png', '/mask-group-2.png', '/mask-group-2.png'],
+    images: ['/mask-group-2.png', 'https://images.pexels.com/photos/7031607/pexels-photo-7031607.jpeg', 'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg'],
   },
 ];
 
-export default function Welcome() {
+export default function Home() {
   const { auth } = usePage<SharedData>().props;
 
   return (
@@ -120,7 +121,7 @@ export default function Welcome() {
                   </div>
                 </div>
 
-                <div className="flex h-[40px] w-[40px] items-center justify-center">
+                <div className="flex h-[40px] w-[40px] items-start justify-center">
                   <SearchIcon className="h-[30px] w-[30px] text-white" />
                 </div>
               </CardContent>
@@ -134,7 +135,7 @@ export default function Welcome() {
               {bungalows.map((bungalow) => (
                 <Dialog key={bungalow.id}>
                   <DialogTrigger asChild>
-                    <div className="mx-auto w-full max-w-[364px] cursor-pointer">
+                    <div className="mx-auto w-full max-w-[364px] cursor-pointer transition duration-300 hover:opacity-90">
                       <img className="aspect-square w-full object-cover" alt={`Bungalow ${bungalow.name}`} src={bungalow.image} />
                       <h3 className="mt-3 font-['Inter',Helvetica] text-base font-semibold text-black">Bungalow &quot;{bungalow.name}&quot;</h3>
                       <p className="mt-1 font-['Inter',Helvetica] text-sm font-semibold text-[#00000099]">
@@ -142,42 +143,39 @@ export default function Welcome() {
                       </p>
                     </div>
                   </DialogTrigger>
-                  <DialogContent className="max-w-[1000px] bg-white p-0">
-                    <DialogTitle className="sr-only">Details voor Bungalow &quot;{bungalow.name}&quot;</DialogTitle>
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="p-6">
-                        <h2 className="mb-4 text-2xl font-semibold">Bungalow &quot;{bungalow.name}&quot;</h2>
-                        <p className="mb-6 text-gray-600">{bungalow.description}</p>
+                  <DialogContent className="min-w-[1000px] border-none p-0 shadow-xl">
+                    <div className="max-h-[100vh] overflow-y-auto bg-white p-6 md:p-10 rounded-2xl">
+                      <h2 className="border-b-2 text-black pb-2 text-3xl font-bold">Bungalow &quot;{bungalow.name}&quot;</h2>
 
-                        <div className="mb-6">
-                          <h3 className="mb-2 font-semibold">Details</h3>
-                          <ul className="space-y-2 text-gray-600">
-                            <li>• {bungalow.persons} Personen</li>
-                            <li>• {bungalow.bedrooms} Slaapkamers</li>
-                            <li>• Basisprijs per nacht €{bungalow.price},-</li>
-                          </ul>
-                        </div>
-
-                        <div>
-                          <h3 className="mb-2 font-semibold">Voorzieningen</h3>
-                          <ul className="grid grid-cols-2 gap-2 text-gray-600">
-                            {bungalow.facilities.map((facility, index) => (
-                              <li key={index}>• {facility}</li>
-                            ))}
-                          </ul>
-                        </div>
+                      <div className="mt-4">
+                        <p className="text-base leading-relaxed text-gray-700">{bungalow.description}</p>
                       </div>
-                      <div className="bg-gray-100 p-6">
-                        <div className="grid grid-cols-2 gap-4">
-                          {bungalow.images.map((image, index) => (
-                            <img
-                              key={index}
-                              src={image}
-                              alt={`Bungalow ${bungalow.name} ${index + 1}`}
-                              className={`w-full object-cover ${index === 0 ? 'col-span-2' : ''}`}
-                            />
-                          ))}
-                        </div>
+
+                      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+                        <img
+                          src={bungalow.images[0]}
+                          alt={`Bungalow ${bungalow.name} foto 2`}
+                          className="h-full w-full object-cover"
+                        />
+                        <img
+                          src={bungalow.images[1]}
+                          alt={`Bungalow ${bungalow.name} foto 3`}
+                          className="h-full w-full object-cover"
+                        />
+                        <img
+                          src={bungalow.images[2]}
+                          alt={`Bungalow ${bungalow.name} foto 4`}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+
+                      <div className="mt-6 flex items-end justify-end">
+                        <Button
+                          type='button'
+                          className="rounded-full bg-[#009416] px-8 py-6 text-lg font-semibold text-white transition-all hover:bg-[#007812] hover:cursor-pointer"
+                        >
+                          Reserveren
+                        </Button>
                       </div>
                     </div>
                   </DialogContent>
