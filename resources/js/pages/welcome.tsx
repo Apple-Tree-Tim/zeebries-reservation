@@ -50,38 +50,19 @@ export default function Welcome() {
         <link rel="preconnect" href="https://fonts.bunny.net" />
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
       </Head>
-      <header className="mb-6 w-full max-w-[335px] text-sm not-has-[nav]:hidden lg:max-w-4xl">
-        <nav className="flex items-center justify-end gap-4">
-          {auth.user ? (
-            <Link
-              href={route('dashboard')}
-              className="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
-            >
-              Dashboard
-            </Link>
-          ) : (
-            <>
-              <Link
-                href={route('login')}
-                className="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#19140035] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]"
-              >
-                Log in
-              </Link>
-              <Link
-                href={route('register')}
-                className="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
-              >
-                Register
-              </Link>
-            </>
-          )}
-        </nav>
-      </header>
       <main className="flex w-full flex-row justify-center bg-neutral-50">
         <div className="relative w-full max-w-[1440px] bg-neutral-50 py-8 md:py-16">
           <header className="flex items-center justify-between px-4 md:px-40">
             <h1 className="font-['Inter',Helvetica] text-xl font-semibold text-[#009416] md:text-[32px]">Vakantiepark de Zeebries</h1>
-            <img className="h-[35px] w-[35px] object-cover md:h-[45px] md:w-[45px]" alt="User account" src="/icons8-user-96-1.png" />
+            {auth.user ? (
+              <Link href={route('dashboard')}>
+                <img className="h-[35px] w-[35px] object-cover md:h-[45px] md:w-[45px]" alt="User account" src="/icons8-user-96-1.png" />
+              </Link>
+            ) : (
+              <Link href={route('login')}>
+                <img className="h-[35px] w-[35px] object-cover md:h-[45px] md:w-[45px]" alt="User account" src="/icons8-user-96-1.png" />
+              </Link>
+            )}
           </header>
 
           <section className="mt-8 flex justify-center px-4 md:mt-16">
@@ -90,7 +71,7 @@ export default function Welcome() {
                 <div className="flex items-center space-x-6">
                   <div className="flex flex-col">
                     <span className="mb-1 text-[14px] font-semibold text-white">In/ uitchecken</span>
-                    <div className="rounded bg-[#1E1E1E] px-3 py-1.5">
+                    <div className="rounded py-1.5">
                       <input
                         type="text"
                         placeholder="mm/dd/yyyy"
@@ -103,7 +84,7 @@ export default function Welcome() {
 
                   <div className="flex flex-col">
                     <span className="mb-1 text-[14px] font-semibold text-white">Wie</span>
-                    <div className="rounded bg-[#1E1E1E] px-3 py-1.5">
+                    <div className="rounded py-1.5">
                       <input
                         type="text"
                         placeholder="Aantal gasten"
@@ -116,7 +97,7 @@ export default function Welcome() {
 
                   <div className="flex flex-col">
                     <span className="mb-1 text-[14px] font-semibold text-white">Hoeveel</span>
-                    <div className="rounded bg-[#1E1E1E] px-3 py-1.5">
+                    <div className="rounded py-1.5">
                       <input
                         type="text"
                         placeholder="Prijs"
@@ -129,7 +110,7 @@ export default function Welcome() {
 
                   <div className="flex flex-col">
                     <span className="mb-1 text-[14px] font-semibold text-white">Extra voorzieningen</span>
-                    <div className="rounded bg-[#1E1E1E] px-3 py-1.5">
+                    <div className="rounded py-1.5">
                       <input
                         type="text"
                         placeholder="Kies extras"
