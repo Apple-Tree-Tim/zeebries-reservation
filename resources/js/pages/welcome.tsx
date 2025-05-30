@@ -13,7 +13,7 @@ const bungalows = [
     persons: 4,
     bedrooms: 2,
     price: 100,
-    description: 'Een gezellige bungalow voor het hele gezin',
+    description: 'us ut non a etiam mattis. Non est vestibulum eu elit nunc consequat. Nibh convallis hac eget vitae scelerisque vitae morbi tortor. Dignissim et mi justo lectus nisl massa. Ut aliquam pellentesque hendrerit iaculis ac sed condimentum vulputate. Elementum mauris id sollicitudin aliquam diam hendrerit. Laoreet ultrices tempor enim massa diam viverra. Felis a nec odio ipsum porta ac vel pharetra in. Dignissim consectetur tincidunt a eget arcu. Id pretium facilisis adipiscing nisl aliquet. Ipsum tristique at diam pellentesque platea massa. Feugiat suspendisse nam sollicitudin vitae neque nunc et varius donec. Sit quis blandit eget netus augue a mauris. Accumsan quam adipiscing massa justo enim eros eu duis. Pretium tristique arcu in feugiat arcu pellentesque.',
     facilities: ['WiFi', 'TV', 'Keuken', 'Badkamer', 'Terras'],
     images: ['/mask-group.png', '/mask-group.png', '/mask-group.png'],
   },
@@ -24,7 +24,7 @@ const bungalows = [
     persons: 6,
     bedrooms: 3,
     price: 120,
-    description: 'Ruime bungalow met veel privacy',
+    description: 'us ut non a etiam mattis. Non est vestibulum eu elit nunc consequat. Nibh convallis hac eget vitae scelerisque vitae morbi tortor. Dignissim et mi justo lectus nisl massa. Ut aliquam pellentesque hendrerit iaculis ac sed condimentum vulputate. Elementum mauris id sollicitudin aliquam diam hendrerit. Laoreet ultrices tempor enim massa diam viverra. Felis a nec odio ipsum porta ac vel pharetra in. Dignissim consectetur tincidunt a eget arcu. Id pretium facilisis adipiscing nisl aliquet. Ipsum tristique at diam pellentesque platea massa. Feugiat suspendisse nam sollicitudin vitae neque nunc et varius donec. Sit quis blandit eget netus augue a mauris. Accumsan quam adipiscing massa justo enim eros eu duis. Pretium tristique arcu in feugiat arcu pellentesque.',
     facilities: ['WiFi', 'TV', 'Keuken', 'Badkamer', 'Terras'],
     images: ['/mask-group-1.png', '/mask-group-1.png', '/mask-group-1.png'],
   },
@@ -35,7 +35,7 @@ const bungalows = [
     persons: 8,
     bedrooms: 3,
     price: 150,
-    description: 'Luxe bungalow met extra voorzieningen',
+    description: 'us ut non a etiam mattis. Non est vestibulum eu elit nunc consequat. Nibh convallis hac eget vitae scelerisque vitae morbi tortor. Dignissim et mi justo lectus nisl massa. Ut aliquam pellentesque hendrerit iaculis ac sed condimentum vulputate. Elementum mauris id sollicitudin aliquam diam hendrerit. Laoreet ultrices tempor enim massa diam viverra. Felis a nec odio ipsum porta ac vel pharetra in. Dignissim consectetur tincidunt a eget arcu. Id pretium facilisis adipiscing nisl aliquet. Ipsum tristique at diam pellentesque platea massa. Feugiat suspendisse nam sollicitudin vitae neque nunc et varius donec. Sit quis blandit eget netus augue a mauris. Accumsan quam adipiscing massa justo enim eros eu duis. Pretium tristique arcu in feugiat arcu pellentesque.',
     facilities: ['WiFi', 'TV', 'Keuken', 'Badkamer', 'Terras'],
     images: ['/mask-group-2.png', '/mask-group-2.png', '/mask-group-2.png'],
   },
@@ -70,11 +70,11 @@ export default function Welcome() {
               <CardContent className="flex h-full items-center justify-between p-6 pl-12">
                 <div className="flex items-center space-x-6">
                   <div className="flex flex-col">
-                    <span className="mb-1 text-[14px] font-semibold text-white">In/ uitchecken</span>
-                    <div className="rounded py-1.5">
+                    <span className="text-[14px] font-semibold text-white">In/ uitchecken</span>
+                    <div className="rounded">
                       <input
                         type="text"
-                        placeholder="mm/dd/yyyy"
+                        placeholder="Datum"
                         className="w-[100px] bg-transparent text-[14px] text-white placeholder-white/60 outline-none"
                       />
                     </div>
@@ -83,8 +83,8 @@ export default function Welcome() {
                   <Separator orientation="vertical" className="h-9 bg-white/50" />
 
                   <div className="flex flex-col">
-                    <span className="mb-1 text-[14px] font-semibold text-white">Wie</span>
-                    <div className="rounded py-1.5">
+                    <span className="text-[14px] font-semibold text-white">Wie</span>
+                    <div className="rounded">
                       <input
                         type="text"
                         placeholder="Aantal gasten"
@@ -96,8 +96,8 @@ export default function Welcome() {
                   <Separator orientation="vertical" className="h-9 bg-white/50" />
 
                   <div className="flex flex-col">
-                    <span className="mb-1 text-[14px] font-semibold text-white">Hoeveel</span>
-                    <div className="rounded py-1.5">
+                    <span className="text-[14px] font-semibold text-white">Hoeveel</span>
+                    <div className="rounded">
                       <input
                         type="text"
                         placeholder="Prijs"
@@ -109,8 +109,8 @@ export default function Welcome() {
                   <Separator orientation="vertical" className="h-9 bg-white/50" />
 
                   <div className="flex flex-col">
-                    <span className="mb-1 text-[14px] font-semibold text-white">Extra voorzieningen</span>
-                    <div className="rounded py-1.5">
+                    <span className="text-[14px] font-semibold text-white">Extra voorzieningen</span>
+                    <div className="rounded">
                       <input
                         type="text"
                         placeholder="Kies extras"
