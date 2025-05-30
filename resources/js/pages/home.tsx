@@ -170,12 +170,14 @@ export default function Home() {
                       </div>
 
                       <div className="mt-6 flex items-end justify-end">
-                        <Button
-                          type='button'
-                          className="rounded-full bg-[#009416] px-8 py-6 text-lg font-semibold text-white transition-all hover:bg-[#007812] hover:cursor-pointer"
-                        >
-                          Reserveren
-                        </Button>
+                        <Link href={route('create-reservation', { id: bungalow.id })}>
+                          <Button
+                            type="button"
+                            className="rounded-full bg-[#009416] px-8 py-6 text-lg font-semibold text-white transition-all hover:bg-[#007812] hover:cursor-pointer"
+                          >
+                            Reserveren
+                          </Button>
+                        </Link>
                       </div>
                     </div>
                   </DialogContent>
