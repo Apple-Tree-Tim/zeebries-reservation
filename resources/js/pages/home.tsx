@@ -25,13 +25,19 @@ export default function Home() {
 
   useEffect(() => {
     api.get('/bungalows')
-      .then(res => setBungalows(res.data))
+      .then(res => {
+        const parsed = res.data.map((b: Bungalow) => ({
+          ...b,
+          images: typeof b.images === 'string' ? JSON.parse(b.images) : b.images
+        }));
+        setBungalows(parsed);
+      })
       .catch(console.error);
   }, []);
 
   return (
     <>
-      <Head title="De Zeebries">
+      <Head title="Home">
         <link rel="preconnect" href="https://fonts.bunny.net" />
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
       </Head>
