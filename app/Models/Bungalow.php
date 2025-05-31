@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Bungalow extends Model
 {
-    protected $fillable = ['name', 'number', 'type'];
+    protected $fillable = ['name', 'description', 'price', 'images', 'image', 'persons', 'bedrooms'];
+
+    protected $casts = [
+        'images' => 'array',
+    ];
 
     public function reservations()
     {

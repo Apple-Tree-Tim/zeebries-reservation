@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{
     GuestController,
@@ -14,17 +15,10 @@ use App\Http\Controllers\{
 // =====================
 // 🔓 Public Routes
 // =====================
-Route::middleware('guest')->group(function () {
-    // Guests can view all bungalows
-    Route::get('/bungalows', [BungalowController::class, 'index']);
-    Route::get('/bungalows/{bungalow}', [BungalowController::class, 'show']);
-
-    // Guests can create a reservation
-    Route::post('/reservations', [ReservationController::class, 'store']);
-
-    // Guests can retrieve their own reservation by ID + email
-    Route::get('/my-reservation/{id}', [ReservationController::class, 'showForGuest']);
-});
+Route::get('/bungalows', [BungalowController::class, 'index']);
+Route::get('/bungalows/{bungalow}', [BungalowController::class, 'show']);
+Route::post('/reservations', [ReservationController::class, 'store']);
+Route::get('/my-reservation/{id}', [ReservationController::class, 'showForGuest']);
 
 // =====================
 // 🔐 Authenticated Routes (Sanctum Protected)

@@ -30,9 +30,19 @@ class BungalowController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string',
-            'number' => 'required|string|unique:bungalows,number',
-            'type' => 'required|string',
+            'image' => 'required|string',
+            'price' => 'required|numeric|min:0',
+            'persons' => 'required|integer|min:1',
+            'bedrooms' => 'required|integer|min:0',
+            'description' => 'required|string',
+            'images' => 'nullable|array',
+            'images.*' => 'string',
         ]);
+
+        // Convert images array to JSON
+        if (isset($data['images'])) {
+            $data['images'] = json_encode($data['images']);
+        }
 
         return Bungalow::create($data);
     }
@@ -42,7 +52,9 @@ class BungalowController extends Controller
      */
     public function show(Bungalow $bungalow)
     {
-        return $bungalow->load('amenities', 'flexiblePrices');
+        $bungalow->images = json_decode($bungalow->images);
+        $bungalow->load('amenities', 'flexiblePrices');
+        return $bungalow;
     }
 
     /**
@@ -59,10 +71,20 @@ class BungalowController extends Controller
     public function update(Request $request, Bungalow $bungalow)
     {
         $data = $request->validate([
-            'name' => 'sometimes|string',
-            'number' => 'sometimes|string|unique:bungalows,number,' . $bungalow->id,
-            'type' => 'sometimes|string',
+            'name' => 'sometimes|string|max:255',
+            'image' => 'sometimes|string',
+            'price' => 'sometimes|numeric|min:0',
+            'persons' => 'sometimes|integer|min:1',
+            'bedrooms' => 'sometimes|integer|min:0',
+            'description' => 'sometimes|string',
+            'images' => 'nullable|array',
+            'images.*' => 'string',
         ]);
+
+        // Convert images array to JSON
+        if (isset($data['images'])) {
+            $data['images'] = json_encode($data['images']);
+        }
 
         $bungalow->update($data);
         return $bungalow;

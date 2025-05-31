@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -5,45 +6,63 @@ import { Separator } from '@/components/ui/separator';
 import { type SharedData } from '@/types';
 import { Head, usePage, Link } from '@inertiajs/react';
 import { SearchIcon } from 'lucide-react';
+import api from '@/api';
 
-const bungalows = [
-  {
-    id: 1,
-    name: 'Garnaal',
-    image: '/mask-group.png',
-    persons: 4,
-    bedrooms: 2,
-    price: 100,
-    description: 'us ut non a etiam mattis. Non est vestibulum eu elit nunc consequat. Nibh convallis hac eget vitae scelerisque vitae morbi tortor. Dignissim et mi justo lectus nisl massa. Ut aliquam pellentesque hendrerit iaculis ac sed condimentum vulputate. Elementum mauris id sollicitudin aliquam diam hendrerit. Laoreet ultrices tempor enim massa diam viverra. Felis a nec odio ipsum porta ac vel pharetra in. Dignissim consectetur tincidunt a eget arcu. Id pretium facilisis adipiscing nisl aliquet. Ipsum tristique at diam pellentesque platea massa. Feugiat suspendisse nam sollicitudin vitae neque nunc et varius donec. Sit quis blandit eget netus augue a mauris. Accumsan quam adipiscing massa justo enim eros eu duis. Pretium tristique arcu in feugiat arcu pellentesque.',
-    facilities: ['WiFi', 'TV', 'Keuken', 'Badkamer', 'Terras'],
-    images: ['/mask-group.png', 'https://images.pexels.com/photos/7031607/pexels-photo-7031607.jpeg', 'https://images.pexels.com/photos/1438832/pexels-photo-1438832.jpeg'],
-  },
-  {
-    id: 2,
-    name: 'Krab',
-    image: '/mask-group-1.png',
-    persons: 6,
-    bedrooms: 3,
-    price: 120,
-    description: 'us ut non a etiam mattis. Non est vestibulum eu elit nunc consequat. Nibh convallis hac eget vitae scelerisque vitae morbi tortor. Dignissim et mi justo lectus nisl massa. Ut aliquam pellentesque hendrerit iaculis ac sed condimentum vulputate. Elementum mauris id sollicitudin aliquam diam hendrerit. Laoreet ultrices tempor enim massa diam viverra. Felis a nec odio ipsum porta ac vel pharetra in. Dignissim consectetur tincidunt a eget arcu. Id pretium facilisis adipiscing nisl aliquet. Ipsum tristique at diam pellentesque platea massa. Feugiat suspendisse nam sollicitudin vitae neque nunc et varius donec. Sit quis blandit eget netus augue a mauris. Accumsan quam adipiscing massa justo enim eros eu duis. Pretium tristique arcu in feugiat arcu pellentesque.',
-    facilities: ['WiFi', 'TV', 'Keuken', 'Badkamer', 'Terras'],
-    images: ['/mask-group-1.png', 'https://images.pexels.com/photos/1438832/pexels-photo-1438832.jpeg', 'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg'],
-  },
-  {
-    id: 3,
-    name: 'Kreeft',
-    image: '/mask-group-2.png',
-    persons: 8,
-    bedrooms: 3,
-    price: 150,
-    description: 'us ut non a etiam mattis. Non est vestibulum eu elit nunc consequat. Nibh convallis hac eget vitae scelerisque vitae morbi tortor. Dignissim et mi justo lectus nisl massa. Ut aliquam pellentesque hendrerit iaculis ac sed condimentum vulputate. Elementum mauris id sollicitudin aliquam diam hendrerit. Laoreet ultrices tempor enim massa diam viverra. Felis a nec odio ipsum porta ac vel pharetra in. Dignissim consectetur tincidunt a eget arcu. Id pretium facilisis adipiscing nisl aliquet. Ipsum tristique at diam pellentesque platea massa. Feugiat suspendisse nam sollicitudin vitae neque nunc et varius donec. Sit quis blandit eget netus augue a mauris. Accumsan quam adipiscing massa justo enim eros eu duis. Pretium tristique arcu in feugiat arcu pellentesque.',
-    facilities: ['WiFi', 'TV', 'Keuken', 'Badkamer', 'Terras'],
-    images: ['/mask-group-2.png', 'https://images.pexels.com/photos/7031607/pexels-photo-7031607.jpeg', 'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg'],
-  },
-];
+// const bungalows = [
+//   {
+//     id: 1,
+//     name: 'Garnaal',
+//     image: '/mask-group.png',
+//     persons: 4,
+//     bedrooms: 2,
+//     price: 100,
+//     description: 'us ut non a etiam mattis. Non est vestibulum eu elit nunc consequat. Nibh convallis hac eget vitae scelerisque vitae morbi tortor. Dignissim et mi justo lectus nisl massa. Ut aliquam pellentesque hendrerit iaculis ac sed condimentum vulputate. Elementum mauris id sollicitudin aliquam diam hendrerit. Laoreet ultrices tempor enim massa diam viverra. Felis a nec odio ipsum porta ac vel pharetra in. Dignissim consectetur tincidunt a eget arcu. Id pretium facilisis adipiscing nisl aliquet. Ipsum tristique at diam pellentesque platea massa. Feugiat suspendisse nam sollicitudin vitae neque nunc et varius donec. Sit quis blandit eget netus augue a mauris. Accumsan quam adipiscing massa justo enim eros eu duis. Pretium tristique arcu in feugiat arcu pellentesque.',
+//     facilities: ['WiFi', 'TV', 'Keuken', 'Badkamer', 'Terras'],
+//     images: ['/mask-group.png', 'https://images.pexels.com/photos/7031607/pexels-photo-7031607.jpeg', 'https://images.pexels.com/photos/1438832/pexels-photo-1438832.jpeg'],
+//   },
+//   {
+//     id: 2,
+//     name: 'Krab',
+//     image: '/mask-group-1.png',
+//     persons: 6,
+//     bedrooms: 3,
+//     price: 120,
+//     description: 'us ut non a etiam mattis. Non est vestibulum eu elit nunc consequat. Nibh convallis hac eget vitae scelerisque vitae morbi tortor. Dignissim et mi justo lectus nisl massa. Ut aliquam pellentesque hendrerit iaculis ac sed condimentum vulputate. Elementum mauris id sollicitudin aliquam diam hendrerit. Laoreet ultrices tempor enim massa diam viverra. Felis a nec odio ipsum porta ac vel pharetra in. Dignissim consectetur tincidunt a eget arcu. Id pretium facilisis adipiscing nisl aliquet. Ipsum tristique at diam pellentesque platea massa. Feugiat suspendisse nam sollicitudin vitae neque nunc et varius donec. Sit quis blandit eget netus augue a mauris. Accumsan quam adipiscing massa justo enim eros eu duis. Pretium tristique arcu in feugiat arcu pellentesque.',
+//     facilities: ['WiFi', 'TV', 'Keuken', 'Badkamer', 'Terras'],
+//     images: ['/mask-group-1.png', 'https://images.pexels.com/photos/1438832/pexels-photo-1438832.jpeg', 'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg'],
+//   },
+//   {
+//     id: 3,
+//     name: 'Kreeft',
+//     image: '/mask-group-2.png',
+//     persons: 8,
+//     bedrooms: 3,
+//     price: 150,
+//     description: 'us ut non a etiam mattis. Non est vestibulum eu elit nunc consequat. Nibh convallis hac eget vitae scelerisque vitae morbi tortor. Dignissim et mi justo lectus nisl massa. Ut aliquam pellentesque hendrerit iaculis ac sed condimentum vulputate. Elementum mauris id sollicitudin aliquam diam hendrerit. Laoreet ultrices tempor enim massa diam viverra. Felis a nec odio ipsum porta ac vel pharetra in. Dignissim consectetur tincidunt a eget arcu. Id pretium facilisis adipiscing nisl aliquet. Ipsum tristique at diam pellentesque platea massa. Feugiat suspendisse nam sollicitudin vitae neque nunc et varius donec. Sit quis blandit eget netus augue a mauris. Accumsan quam adipiscing massa justo enim eros eu duis. Pretium tristique arcu in feugiat arcu pellentesque.',
+//     facilities: ['WiFi', 'TV', 'Keuken', 'Badkamer', 'Terras'],
+//     images: ['/mask-group-2.png', 'https://images.pexels.com/photos/7031607/pexels-photo-7031607.jpeg', 'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg'],
+//   },
+// ];
+interface Bungalow {
+  id: number;
+  name: string;
+  image: string;
+  persons: number;
+  bedrooms: number;
+  price: number;
+  description: string;
+  images: string[];
+}
 
 export default function Home() {
   const { auth } = usePage<SharedData>().props;
+  const [bungalows, setBungalows] = useState<Bungalow[]>([]);
+
+  useEffect(() => {
+    api.get('/bungalows')
+      .then(res => setBungalows(res.data))
+      .catch(console.error);
+  }, []);
 
   return (
     <>

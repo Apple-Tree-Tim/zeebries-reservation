@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+
 export default function CreateReserve() {
   // Personal information fields
   const personalFields = [
@@ -90,7 +91,7 @@ export default function CreateReserve() {
                   <Input
                     id={field.id}
                     placeholder={field.label}
-                    className="h-[81px] text-2xl px-5 py-6 rounded-[10px] bg-white"
+                    className="text-3xl px-5 py-6 rounded-[10px] bg-white text-black"
                   />
                 </div>
               ))}
@@ -110,7 +111,7 @@ export default function CreateReserve() {
                       <Input
                         id={field.id}
                         placeholder={field.label}
-                        className="h-[81px] text-2xl px-5 py-6 rounded-[10px] bg-white"
+                        className="text-3xl px-5 py-6 rounded-[10px] text-black"
                       />
                     </div>
                   ),
@@ -120,7 +121,7 @@ export default function CreateReserve() {
             {/* Bungalows Dropdown */}
             <div className="mb-4">
               <Select>
-                <SelectTrigger className="h-[81px] text-2xl px-5 py-6 rounded-[10px] bg-white w-full opacity-60">
+                <SelectTrigger className="text-sm px-5 py-6 rounded-[10px] bg-white w-full opacity-60">
                   <SelectValue placeholder="Bungalows" />
                 </SelectTrigger>
                 <SelectContent>
@@ -137,7 +138,7 @@ export default function CreateReserve() {
                       <Input
                         id={field.id}
                         placeholder={field.label}
-                        className="h-[81px] text-2xl px-5 py-6 rounded-[10px] bg-white"
+                        className="text-2xl px-5 py-6 rounded-[10px] text-black"
                       />
                     </div>
                   ),
@@ -162,7 +163,7 @@ export default function CreateReserve() {
                   </div>
                   <Label
                     htmlFor={amenity.id}
-                    className="text-2xl font-normal font-['Inter',Helvetica]"
+                    className="text-xl font-normal text-black font-['Inter',Helvetica]"
                   >
                     {amenity.label}
                   </Label>
@@ -181,23 +182,12 @@ export default function CreateReserve() {
                 <div key={method.id} className="flex items-center space-x-3">
                   <div className="w-5 h-5 rounded border-2 border-solid border-black flex items-center justify-center">
                     {method.checked && (
-                      <>
-                        <img
-                          className="w-[17px] h-[17px]"
-                          alt="Line"
-                          src="/line-6.svg"
-                        />
-                        <img
-                          className="w-[17px] h-[17px] -ml-[1px]"
-                          alt="Line"
-                          src="/line-7.svg"
-                        />
-                      </>
+                      <div></div>
                     )}
                   </div>
                   <Label
                     htmlFor={method.id}
-                    className="text-2xl font-normal font-['Inter',Helvetica]"
+                    className="text-xl text-black font-normal font-['Inter',Helvetica]"
                   >
                     {method.label}
                   </Label>
@@ -213,7 +203,7 @@ export default function CreateReserve() {
             </h3>
             <Input
               placeholder="21MEI"
-              className="h-[81px] text-2xl px-5 py-6 rounded-[10px] bg-white w-full opacity-60"
+              className="text-xl px-5 py-6 rounded-[10px] text-black w-full opacity-60"
             />
           </section>
 
@@ -222,10 +212,10 @@ export default function CreateReserve() {
             <h3 className="font-medium text-black text-xl font-['Inter',Helvetica] mb-4">
               Prijs
             </h3>
-            <Card className="rounded-[10px] w-[884px]">
+            <Card className="rounded-[10px] w-[884px] bg-white p-0">
               <CardContent className="p-0">
-                <div className="h-[81px] flex items-center px-7">
-                  <span className="font-normal text-black text-2xl font-['Inter',Helvetica]">
+                <div className="flex items-center px-5 py-4">
+                  <span className="font-normal text-black text-medium font-['Inter',Helvetica]">
                     460,-
                   </span>
                 </div>
@@ -235,7 +225,7 @@ export default function CreateReserve() {
 
           {/* Pay Button */}
           <div className="flex justify-end">
-            <Button className="bg-[#009416] text-white rounded-[35px] h-[70px] w-[213px] text-xl font-medium">
+            <Button className="bg-[#009416] text-white rounded-[35px] h-[70px] w-[213px] text-xl font-medium hover:bg-[#009416] hover:cursor-pointer">
               Betalen
             </Button>
           </div>

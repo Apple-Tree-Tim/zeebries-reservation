@@ -11,7 +11,7 @@ class ReservationController extends Controller
      * Display a listing of the resource.
      */
     public function index() {
-        return Reservation::with(['guest', 'bungalow', 'employee', 'discountCode'])->get();
+        return Reservation::with(['guest', 'bungalow', 'discountCode'])->get();
     }
 
     /**
@@ -32,7 +32,6 @@ class ReservationController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'status' => 'required|string',
-            'employee_id' => 'nullable|exists:employees,id',
             'discount_code_id' => 'nullable|exists:discount_codes,id',
             'total_cost' => 'required|numeric'
         ]);
@@ -43,7 +42,7 @@ class ReservationController extends Controller
      * Display the specified resource.
      */
     public function show(Reservation $reservation) {
-        return $reservation->load(['guest', 'bungalow', 'employee', 'discountCode']);
+        return $reservation->load(['guest', 'bungalow', 'discountCode']);
     }
 
     /**

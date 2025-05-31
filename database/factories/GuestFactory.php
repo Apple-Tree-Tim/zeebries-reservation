@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Guest;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,15 +10,16 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class GuestFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = Guest::class;
+
     public function definition(): array
     {
         return [
-            //
+            'name' => $this->faker->name,
+            'email' => $this->faker->unique()->safeEmail,
+            'address' => $this->faker->address,
+            'postal_code' => $this->faker->postcode,
+            'phone_number' => $this->faker->phoneNumber,
         ];
     }
 }
