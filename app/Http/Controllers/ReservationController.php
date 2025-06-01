@@ -31,10 +31,14 @@ class ReservationController extends Controller
             'bungalow_id' => 'required|exists:bungalows,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
-            'status' => 'required|string',
+            'status' => 'nullable|string',
             'discount_code_id' => 'nullable|exists:discount_codes,id',
             'total_cost' => 'required|numeric'
         ]);
+
+        // Set default status if not provided or empty
+        $data['status'] = $data['status'] ?? 'pending';
+
         return Reservation::create($data);
     }
 

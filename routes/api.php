@@ -17,6 +17,7 @@ use App\Http\Controllers\{
 // =====================
 Route::get('/bungalows', [BungalowController::class, 'index']);
 Route::get('/bungalows/{bungalow}', [BungalowController::class, 'show']);
+Route::post('/guests', [GuestController::class, 'store']);
 Route::post('/reservations', [ReservationController::class, 'store']);
 Route::get('/my-reservation/{id}', [ReservationController::class, 'showForGuest']);
 Route::get('/discount-codes', [DiscountCodeController::class, 'index']);
@@ -27,7 +28,7 @@ Route::get('/amenities', [AmenityController::class, 'index']);
 // =====================
 Route::middleware('auth:sanctum')->group(function () {
     // Guests CRUD
-    Route::apiResource('guests', GuestController::class);
+    Route::apiResource('guests', GuestController::class)->except(['store']);
 
     // Full CRUD for Reservations, Bungalows, etc.
     Route::apiResource('reservations', ReservationController::class)->except(['store']); // Store is public

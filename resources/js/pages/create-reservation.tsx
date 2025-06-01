@@ -1,6 +1,6 @@
+import { Toaster, toast } from 'sonner';
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup } from '@/components/ui/radio-group';
@@ -17,6 +17,7 @@ interface Bungalow {
 }
 
 interface DiscountCode {
+  id: number;
   code: string;
   percentage: number;
 }
@@ -99,28 +100,43 @@ export default function CreateReserve() {
     setDiscountValid(discountCodes.some(dc => dc.code === code));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!personalData.firstName || !personalData.lastName || !reservationData.startDate || !selectedBungalow) {
-      alert('Vul alle verplichte velden in.');
+      toast.warning('Vul alle verplichte velden in.');
       return;
     }
 
-    api.post('/guests', {
-      personalData: {
-        ...personalData,
-        name: `${personalData.firstName} ${personalData.lastName}`,
-      },
-    }).then(res => {
-      api.post('/reservations', {
-        reservationData,
-        amenities: selectedAmenities,
-        discountCode,
-        bungalowId: selectedBungalow?.id,
-        guestId: res.data.id,
-      }).then(res => {
-        window.location.href = res.data.redirect;
-      }).catch(console.error);
-    });
+    const guestPayload = {
+      name: `${personalData.firstName} ${personalData.lastName}`,
+      email: personalData.email,
+      address: personalData.address,
+      postal_code: personalData.postalCode,
+      phone_number: personalData.phoneNumber,
+    };
+
+    try {
+      const guestRes = await api.post('/guests', guestPayload);
+      const guestId = guestRes.data.id;
+
+      const reservationPayload = {
+        start_date: reservationData.startDate,
+        end_date: reservationData.endDate,
+        discount_code_id: discountCodes.find(d => d.code === discountCode)?.id,
+        bungalow_id: selectedBungalow.id,
+        guest_id: guestId,
+        total_cost: calculateTotal(),
+      };
+
+      await api.post('/reservations', reservationPayload);
+      // Show success toast
+      toast.success('Reservering succesvol!');
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 2500);
+    } catch (err) {
+      console.error('Reservering mislukt:', err);
+      toast.error('Reservering mislukt. Probeer het opnieuw.');
+    }
   };
 
   const calculateTotal = () => {
@@ -142,6 +158,7 @@ export default function CreateReserve() {
 
   return (
     <>
+      <Toaster position="top-right" richColors />
       <Head title="Vakantiepark" />
       <main className="flex w-full flex-row justify-center bg-neutral-50">
         <div className="relative w-full max-w-[1440px] py-8 md:py-16">
@@ -188,7 +205,7 @@ export default function CreateReserve() {
                   }
                 }}
               >
-                <SelectTrigger className="w-full rounded-[10px]  px-5 py-6 text-sm text-black">
+                <SelectTrigger className="w-full rounded-[10px]  px-3 py-6 text-lg text-black">
                   <SelectValue placeholder="Kies een bungalow" />
                 </SelectTrigger>
                 <SelectContent>
@@ -249,18 +266,14 @@ export default function CreateReserve() {
             {/* Total Price */}
             <section>
               <h3 className="mb-4 text-xl font-medium text-black">Prijs</h3>
-              <Card className="w-[884px]  rounded-[10px]">
-                <CardContent className="p-0">
-                  <div className="flex items-center px-5 py-4 text-xl">
-                    Totaal: €{calculateTotal().toFixed(2)}
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="flex items-center px-5 py-2 text-2xl text-black">
+                Totaal: €{calculateTotal().toFixed(2)}
+              </div>
             </section>
 
             {/* Pay Button */}
             <div className="flex justify-end">
-              <Button onClick={handleSubmit} className="h-[70px] w-[213px] rounded-[35px] bg-[#009416] text-xl text-white">
+              <Button onClick={handleSubmit} className="h-[70px] w-[213px] rounded-[35px] bg-[#009416] text-xl text-white hover:bg-[#007812] hover: cursor-pointer">
                 Betalen
               </Button>
             </div>

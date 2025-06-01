@@ -24,7 +24,21 @@ class GuestController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request) {
-        return Guest::create($request->all());
+        // Define the fields you consider for identifying duplicates
+        $criteria = [
+            'email' => $request->input('email'),
+            // Add more fields if needed, e.g., 'name' => $request->input('name')
+        ];
+
+        // Check if a guest with the same email already exists
+        $existingGuest = Guest::where($criteria)->first();
+
+        if ($existingGuest) {
+            return $existingGuest;
+        } else {
+            $guest = Guest::create($request->all());
+            return $guest;
+        }
     }
 
     /**
