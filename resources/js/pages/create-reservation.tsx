@@ -1,236 +1,272 @@
-import { CheckIcon } from "lucide-react";
-import React from "react";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { RadioGroup } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectTrigger, SelectValue, SelectItem } from '@/components/ui/select';
+import { Head, usePage, Link } from '@inertiajs/react';
+import { type SharedData } from '@/types';
+import { CheckIcon } from 'lucide-react';
+import api from '@/api';
 
+interface Bungalow {
+  id: number;
+  name: string;
+  price: number;
+}
+
+interface DiscountCode {
+  code: string;
+  percentage: number;
+}
+
+interface Amenity {
+  name: string;
+  label: string;
+  price: number;
+}
 
 export default function CreateReserve() {
-  // Personal information fields
-  const personalFields = [
-    { id: "firstName", label: "Voornaam", className: "col-span-1" },
-    { id: "lastName", label: "Achternaam", className: "col-span-1" },
-    { id: "address", label: "Adres", className: "col-span-1" },
-    { id: "postalCode", label: "Postcode", className: "col-span-1" },
-    { id: "email", label: "E-mailadres", className: "col-span-1" },
-    { id: "phone", label: "Telefoonummer", className: "col-span-1" },
-  ];
+  const { auth } = usePage<SharedData>().props;
 
-  // Reservation details fields
-  const reservationFields = [
-    { id: "arrival", label: "Aankomst", className: "col-span-1" },
-    { id: "departure", label: "Vertrek", className: "col-span-1" },
-    { id: "guests", label: "Aantal gasten", className: "col-span-1" },
-    { id: "phone2", label: "Telefoonummer", className: "col-span-1" },
-  ];
+  const [bungalows, setBungalows] = useState<Bungalow[]>([]);
+  const [discountCodes, setDiscountCodes] = useState<DiscountCode[]>([]);
+  const [amenities, setAmenities] = useState<Amenity[]>([]);
+  const [selectedAmenities, setSelectedAmenities] = useState<Amenity[]>([]);
+  const [selectedBungalow, setSelectedBungalow] = useState<Bungalow | null>(null);
+  const [discountCode, setDiscountCode] = useState<string>('');
+  const [discountValid, setDiscountValid] = useState(true);
 
-  // Extra amenities
-  const amenities = [
-    { id: "fireplace", label: "Openhaard +20,-", checked: true },
-    { id: "bath", label: "Ligbad +20,-", checked: true },
-    { id: "sauna", label: "Sauna +30,-", checked: false },
-    { id: "jacuzzi", label: "Jacuzzi +30,-", checked: false },
-    {
-      id: "waterpark",
-      label: "Zwemparadijs (niet mogelijk)",
-      checked: false,
-      disabled: true,
-    },
-    { id: "wifi", label: "Wifi +20,-", checked: false },
-    { id: "airco", label: "Airco +50,-", checked: false },
-  ];
+  const [personalData, setPersonalData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    address: '',
+    postalCode: '',
+    phoneNumber: '',
+  });
 
-  // Payment methods
-  const paymentMethods = [
-    { id: "ideal", label: "Ideal", checked: true },
-    { id: "paypal", label: "Paypal", checked: false },
-    { id: "creditcard", label: "Creditcard", checked: false },
-  ];
+  const [reservationData, setReservationData] = useState({
+    startDate: '',
+    endDate: '',
+    guests: 1,
+    phone2: '',
+    bungalowId: 0,
+  });
+
+  useEffect(() => {
+    api.get('/bungalows').then(res => setBungalows(res.data)).catch(console.error);
+    api.get('/discount-codes').then(res => setDiscountCodes(res.data)).catch(console.error);
+    api.get('/amenities').then(res => setAmenities(res.data)).catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const selectedBungalowId = params.get('id');
+
+    if (bungalows.length && selectedBungalowId) {
+      const found = bungalows.find(b => b.id === parseInt(selectedBungalowId));
+      console.log(found);
+      if (found) {
+        setSelectedBungalow(found);
+        setReservationData(prev => ({ ...prev, bungalowId: found.id }));
+      }
+    }
+  }, [bungalows]);
+
+  const toggleAmenity = (amenity: Amenity) => {
+    if (selectedAmenities.includes(amenity)) {
+      setSelectedAmenities(selectedAmenities.filter(a => a !== amenity));
+    } else {
+      setSelectedAmenities([...selectedAmenities, amenity]);
+    }
+  };
+
+  const handlePersonalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setPersonalData(prev => ({ ...prev, [id]: value }));
+  };
+
+  const handleReservationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setReservationData(prev => ({ ...prev, [id]: value }));
+  };
+
+  const handleDiscountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const code = e.target.value.trim();
+    setDiscountCode(code);
+    setDiscountValid(discountCodes.some(dc => dc.code === code));
+  };
+
+  const handleSubmit = () => {
+    if (!personalData.firstName || !personalData.lastName || !reservationData.startDate || !selectedBungalow) {
+      alert('Vul alle verplichte velden in.');
+      return;
+    }
+
+    api.post('/guests', {
+      personalData: {
+        ...personalData,
+        name: `${personalData.firstName} ${personalData.lastName}`,
+      },
+    }).then(res => {
+      api.post('/reservations', {
+        reservationData,
+        amenities: selectedAmenities,
+        discountCode,
+        bungalowId: selectedBungalow?.id,
+        guestId: res.data.id,
+      }).then(res => {
+        window.location.href = res.data.redirect;
+      }).catch(console.error);
+    });
+  };
+
+  const calculateTotal = () => {
+    const basePrice = Number(selectedBungalow?.price) || 0;
+    const extras = selectedAmenities.reduce((sum, a) => sum + Number(a.price), 0);
+
+    // Calculate number of nights
+    const start = new Date(reservationData.startDate);
+    const end = new Date(reservationData.endDate);
+    const timeDiff = end.getTime() - start.getTime();
+    const nights = timeDiff > 0 ? Math.ceil(timeDiff / (1000 * 60 * 60 * 24)) : 0;
+
+    const stayPrice = basePrice * nights;
+    const total = stayPrice + extras;
+
+    const discount = discountCodes.find(d => d.code === discountCode)?.percentage || 0;
+    return discountValid ? total - (total * discount / 100) : total;
+  };
 
   return (
-    <div className="bg-neutral-50 flex flex-row justify-center w-full">
-      <div className="bg-neutral-50 w-full max-w-[1440px] relative px-10 py-12">
-        {/* Header */}
-        <header className="flex justify-between items-center mb-16">
-          <h1 className="font-semibold text-[#009416] text-[32px] font-['Inter',Helvetica]">
-            Vakantiepark de Zeebries
-          </h1>
-          <Avatar className="w-[45px] h-[45px]">
-            <AvatarImage src="/icons8-user-96-1.png" alt="User" />
-            <AvatarFallback>U</AvatarFallback>
-          </Avatar>
-        </header>
+    <>
+      <Head title="Vakantiepark" />
+      <main className="flex w-full flex-row justify-center bg-neutral-50">
+        <div className="relative w-full max-w-[1440px] py-8 md:py-16">
+          {/* Header */}
+          <header className="flex items-center justify-between px-4 md:px-40">
+            <h1 className="text-xl font-semibold text-[#009416] md:text-[32px]">Vakantiepark de Zeebries</h1>
+            <Link href={auth.user ? route('dashboard') : route('login')}>
+              <img className="h-[35px] w-[35px] md:h-[45px] md:w-[45px]" alt="User" src="/icons8-user-96-1.png" />
+            </Link>
+          </header>
 
-        <main className="space-y-10">
-          {/* Title */}
-          <h2 className="font-semibold text-black text-[32px] font-['Inter',Helvetica] underline">
-            Reseveren
-          </h2>
+          <div className="space-y-10 px-4 md:px-40 mt-2">
+            <h2 className="text-[32px] font-semibold text-black underline">Reseveren</h2>
 
-          {/* Personal Information Section */}
-          <section>
-            <h3 className="font-semibold text-black text-xl font-['Inter',Helvetica] mb-4">
-              Persoonlijke gegevens
-            </h3>
-            <div className="grid grid-cols-2 gap-4">
-              {personalFields.map((field) => (
-                <div key={field.id} className={field.className}>
-                  <Input
-                    id={field.id}
-                    placeholder={field.label}
-                    className="text-3xl px-5 py-6 rounded-[10px] bg-white text-black"
-                  />
-                </div>
-              ))}
-            </div>
-          </section>
+            {/* Personal Info */}
+            <section>
+              <h3 className="mb-4 text-xl font-semibold text-black">Persoonlijke gegevens</h3>
+              <div className="grid grid-cols-2 gap-4 text-black">
+                <Input id="firstName" placeholder="Voornaam" value={personalData.firstName} onChange={handlePersonalChange} />
+                <Input id="lastName" placeholder="Achternaam" value={personalData.lastName} onChange={handlePersonalChange} />
+                <Input id="email" placeholder="E-mailadres" value={personalData.email} onChange={handlePersonalChange} />
+                <Input id="address" placeholder="Adres" value={personalData.address} onChange={handlePersonalChange} />
+                <Input id="postalCode" placeholder="Postcode" value={personalData.postalCode} onChange={handlePersonalChange} />
+                <Input id="phoneNumber" placeholder="Telefoonnummer" value={personalData.phoneNumber} onChange={handlePersonalChange} />
+              </div>
+            </section>
 
-          {/* Reservation Details Section */}
-          <section>
-            <h3 className="font-semibold text-black text-xl font-['Inter',Helvetica] mb-4">
-              Reserveringsdetails
-            </h3>
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              {reservationFields.map(
-                (field, index) =>
-                  index < 2 && (
-                    <div key={field.id} className={field.className}>
-                      <Input
-                        id={field.id}
-                        placeholder={field.label}
-                        className="text-3xl px-5 py-6 rounded-[10px] text-black"
-                      />
-                    </div>
-                  ),
-              )}
-            </div>
+            {/* Reservation */}
+            <section>
+              <h3 className="mb-4 text-xl font-semibold text-black">Reserveringsdetails</h3>
+              <div className="grid grid-cols-2 gap-4 mb-4 text-black">
+                <Input id="startDate" placeholder="Aankomst" type="date" value={reservationData.startDate} onChange={handleReservationChange} />
+                <Input id="endDate" placeholder="Vertrek" type="date" value={reservationData.endDate} onChange={handleReservationChange} />
+              </div>
 
-            {/* Bungalows Dropdown */}
-            <div className="mb-4">
-              <Select>
-                <SelectTrigger className="text-sm px-5 py-6 rounded-[10px] bg-white w-full opacity-60">
-                  <SelectValue placeholder="Bungalows" />
+              {/* Bungalows */}
+              <Select
+                value={selectedBungalow ? String(selectedBungalow.id) : ''}
+                onValueChange={value => {
+                  const bungalow = bungalows.find(b => b.id === parseInt(value));
+                  if (bungalow) {
+                    setSelectedBungalow(bungalow);
+                    setReservationData(prev => ({ ...prev, bungalowId: bungalow.id }));
+                  }
+                }}
+              >
+                <SelectTrigger className="w-full rounded-[10px]  px-5 py-6 text-sm text-black">
+                  <SelectValue placeholder="Kies een bungalow" />
                 </SelectTrigger>
                 <SelectContent>
-                  {/* Bungalow options would go here */}
+                  {bungalows.map(bungalow => (
+                    <SelectItem key={bungalow.id} value={String(bungalow.id)}>
+                      {bungalow.name} – €{bungalow.price}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
-            </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              {reservationFields.map(
-                (field, index) =>
-                  index >= 2 && (
-                    <div key={field.id} className={field.className}>
-                      <Input
-                        id={field.id}
-                        placeholder={field.label}
-                        className="text-2xl px-5 py-6 rounded-[10px] text-black"
-                      />
+              <div className="grid grid-cols-2 gap-4 mt-4 text-black">
+                <Input id="guests" placeholder="Aantal gasten" type="number" min={1} value={reservationData.guests} onChange={handleReservationChange} />
+                <Input id="phone2" placeholder="Telefoonnummer" value={reservationData.phone2} onChange={handleReservationChange} />
+              </div>
+            </section>
+
+            {/* Amenities */}
+            <section>
+              <h3 className="mb-4 text-xl font-semibold text-black">Extra voorzieningen</h3>
+              <div className="space-y-2 text-black">
+                {amenities.map(amenity => (
+                  <div key={amenity.name} className="flex items-center space-x-3 cursor-pointer" onClick={() => toggleAmenity(amenity)}>
+                    <div className={`flex h-5 w-5 items-center justify-center rounded border-2 border-black ${selectedAmenities.includes(amenity) ? 'bg-black' : ''}`}>
+                      {selectedAmenities.includes(amenity) && <CheckIcon className="h-3 w-3 text-white" />}
                     </div>
-                  ),
-              )}
-            </div>
-          </section>
-
-          {/* Extra Amenities Section */}
-          <section>
-            <h3 className="font-semibold text-black text-xl font-['Inter',Helvetica] mb-4">
-              Extra voorzieningen
-            </h3>
-            <div className="space-y-2">
-              {amenities.map((amenity) => (
-                <div key={amenity.id} className="flex items-center space-x-3">
-                  <div
-                    className={`w-5 h-5 rounded border-2 border-solid border-black flex items-center justify-center ${amenity.id === "waterpark" ? "bg-[#ff0000]" : amenity.checked ? "bg-[#009416]" : ""}`}
-                  >
-                    {amenity.checked && (
-                      <CheckIcon className="h-3 w-3 text-white" />
-                    )}
+                    <Label className="text-xl">{amenity.label}, +{amenity.price},-</Label>
                   </div>
-                  <Label
-                    htmlFor={amenity.id}
-                    className="text-xl font-normal text-black font-['Inter',Helvetica]"
-                  >
-                    {amenity.label}
-                  </Label>
-                </div>
-              ))}
-            </div>
-          </section>
+                ))}
+              </div>
+            </section>
 
-          {/* Payment Methods Section */}
-          <section>
-            <h3 className="font-semibold text-black text-xl font-['Inter',Helvetica] mb-4">
-              Betaalmogelijkheden
-            </h3>
-            <RadioGroup defaultValue="ideal">
-              {paymentMethods.map((method) => (
-                <div key={method.id} className="flex items-center space-x-3">
-                  <div className="w-5 h-5 rounded border-2 border-solid border-black flex items-center justify-center">
-                    {method.checked && (
-                      <div></div>
-                    )}
+            {/* Payment Methods */}
+            <section>
+              <h3 className="mb-4 text-xl font-semibold text-black">Betaalmogelijkheden</h3>
+              <RadioGroup defaultValue="ideal">
+                {['ideal', 'paypal', 'creditcard'].map(method => (
+                  <div key={method} className="flex items-center space-x-3 text-black">
+                    <div className="flex h-5 w-5 items-center justify-center rounded border-2 border-solid border-black" />
+                    <Label htmlFor={method} className="text-xl">{method.charAt(0).toUpperCase() + method.slice(1)}</Label>
                   </div>
-                  <Label
-                    htmlFor={method.id}
-                    className="text-xl text-black font-normal font-['Inter',Helvetica]"
-                  >
-                    {method.label}
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
-          </section>
+                ))}
+              </RadioGroup>
+            </section>
 
-          {/* Discount Code Section */}
-          <section>
-            <h3 className="font-medium text-black text-xl font-['Inter',Helvetica] mb-4">
-              Kortingscode
-            </h3>
-            <Input
-              placeholder="21MEI"
-              className="text-xl px-5 py-6 rounded-[10px] text-black w-full opacity-60"
-            />
-          </section>
+            {/* Discount Code */}
+            <section>
+              <h3 className="mb-2 text-xl font-medium text-black">Kortingscode</h3>
+              <Input
+                value={discountCode}
+                onChange={handleDiscountChange}
+                placeholder="21MEI"
+                className={`w-full text-black ${!discountValid ? 'border border-red-500' : ''}`}
+              />
+              {!discountValid && <p className="text-sm text-red-500 mt-1">Ongeldige kortingscode</p>}
+            </section>
 
-          {/* Price Section */}
-          <section>
-            <h3 className="font-medium text-black text-xl font-['Inter',Helvetica] mb-4">
-              Prijs
-            </h3>
-            <Card className="rounded-[10px] w-[884px] bg-white p-0">
-              <CardContent className="p-0">
-                <div className="flex items-center px-5 py-4">
-                  <span className="font-normal text-black text-medium font-['Inter',Helvetica]">
-                    460,-
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
+            {/* Total Price */}
+            <section>
+              <h3 className="mb-4 text-xl font-medium text-black">Prijs</h3>
+              <Card className="w-[884px]  rounded-[10px]">
+                <CardContent className="p-0">
+                  <div className="flex items-center px-5 py-4 text-xl">
+                    Totaal: €{calculateTotal().toFixed(2)}
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
 
-          {/* Pay Button */}
-          <div className="flex justify-end">
-            <Button className="bg-[#009416] text-white rounded-[35px] h-[70px] w-[213px] text-xl font-medium hover:bg-[#009416] hover:cursor-pointer">
-              Betalen
-            </Button>
+            {/* Pay Button */}
+            <div className="flex justify-end">
+              <Button onClick={handleSubmit} className="h-[70px] w-[213px] rounded-[35px] bg-[#009416] text-xl text-white">
+                Betalen
+              </Button>
+            </div>
           </div>
-        </main>
-      </div>
-    </div>
+        </div>
+      </main>
+    </>
   );
 }

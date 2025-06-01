@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Amenity extends Model
 {
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'label', 'price'];
 
     public function bungalows()
     {
