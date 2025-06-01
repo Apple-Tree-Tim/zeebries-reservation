@@ -1,4 +1,5 @@
-import React, { JSX } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { JSX, useEffect, useState } from "react";
 import { type SharedData } from '@/types';
 import { Head, usePage, Link } from '@inertiajs/react';
 import { Badge } from "@/components/ui/badge";
@@ -10,40 +11,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-// Define booking data for reuse
-const bookings = [
-  {
-    date: "21/5/2022",
-    name: "John M.",
-    orderNumber: "2025001",
-    checkInOut: "21 mei / 28mei",
-    price: "460,-",
-    status: "Betaald",
-    statusColor: "bg-[#00a508]",
-  },
-  {
-    date: "21/5/2022",
-    name: "John M.",
-    orderNumber: "2025001",
-    checkInOut: "21 mei / 28mei",
-    price: "460,-",
-    status: "Niet betaald",
-    statusColor: "bg-[#a50500]",
-  },
-  {
-    date: "21/5/2022",
-    name: "John M.",
-    orderNumber: "2025001",
-    checkInOut: "21 mei / 28mei",
-    price: "460,-",
-    status: "Gedeeltelijk",
-    statusColor: "bg-[#ff9800]",
-  },
-];
+import api from '@/api';
 
 export const Reservations = (): JSX.Element => {
   const { auth } = usePage<SharedData>().props;
+  const [reservations, setReservations] = useState<any[]>([]);
+
+  useEffect(() => {
+    api.get('/reservations').then(res => setReservations(res.data)).catch(console.error);
+  }, []);
+
+  function formatDutchDate(dateString: string) {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('nl-NL', {
+      day: 'numeric',
+      month: 'long'
+    }).format(date);
+  }
 
   return (
     <>
@@ -99,31 +83,36 @@ export const Reservations = (): JSX.Element => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {bookings.map((booking, index) => (
+                {reservations.map((reservation, index) => (
                   <TableRow
                     key={index}
                     className="bg-white rounded-[10px] h-[81px] mb-3"
                   >
                     <TableCell className="opacity-60 font-['Inter',Helvetica] font-normal text-black text-2xl">
-                      {booking.date}
+                      {new Date(reservation.created_at).toLocaleDateString('en-GB')}
                     </TableCell>
                     <TableCell className="opacity-60 font-['Inter',Helvetica] font-normal text-black text-2xl">
-                      {booking.name}
+                      {reservation.guest.name}
                     </TableCell>
                     <TableCell className="opacity-60 font-['Inter',Helvetica] font-normal text-black text-2xl">
-                      {booking.orderNumber}
+                      {reservation.id}
                     </TableCell>
                     <TableCell className="opacity-60 font-['Inter',Helvetica] font-normal text-black text-2xl">
-                      {booking.checkInOut}
+                      {formatDutchDate(reservation.start_date)} / {formatDutchDate(reservation.end_date)}
                     </TableCell>
                     <TableCell className="opacity-60 font-['Inter',Helvetica] font-normal text-black text-2xl">
-                      {booking.price}
+                      {reservation.total_cost}
                     </TableCell>
                     <TableCell>
                       <Badge
-                        className={`${booking.statusColor} text-white rounded-[25px] w-[120px] h-12 flex items-center justify-center font-['Inter',Helvetica] font-medium text-sm`}
+                        className="w-[120px] h-12 rounded-[25px] flex items-center justify-center"
+                        style={{
+                          backgroundColor: reservation.status === 'pending' ? '#ff9800' : (reservation.status === 'confirmed' ? '#00a508' : '#a50500')
+                        }}
                       >
-                        {booking.status}
+                        <span className="font-medium text-white text-sm">
+                          {reservation.status}
+                        </span>
                       </Badge>
                     </TableCell>
                   </TableRow>

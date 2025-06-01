@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { PencilIcon, PlusIcon, TrashIcon } from "lucide-react";
-import React, { JSX } from "react";
+import React, { JSX, useEffect, useState } from "react";
 import { type SharedData } from '@/types';
 import { Head, usePage, Link } from '@inertiajs/react';
 import { Badge } from "@/components/ui/badge";
@@ -13,58 +14,49 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import api from '@/api';
 
 export const Dashboard = (): JSX.Element => {
-  // Recent bookings data
-  const recentBookings = [
-    {
-      date: "21/5/2022",
-      name: "John M.",
-      orderNumber: "2025001",
-      checkInOut: "21 mei / 28mei",
-      price: "460,-",
-      status: "Betaald",
-      statusColor: "#00a508",
-    },
-    {
-      date: "21/5/2022",
-      name: "John M.",
-      orderNumber: "2025001",
-      checkInOut: "21 mei / 28mei",
-      price: "460,-",
-      status: "Niet betaald",
-      statusColor: "#a50500",
-    },
-    {
-      date: "21/5/2022",
-      name: "John M.",
-      orderNumber: "2025001",
-      checkInOut: "21 mei / 28mei",
-      price: "460,-",
-      status: "Gedeeltelijk",
-      statusColor: "#ff9800",
-    },
-  ];
-
-  // Discount codes data
-  const discountCodes = [
-    {
-      date: "21/5/2022",
-      code: "MEI21",
-      discount: "10%",
-    },
-  ];
-
-  // Flexible pricing options data
-  const flexiblePricing = [
-    {
-      period: "21/5/2022 - 26/5/2022",
-      name: "Last minute",
-      discount: "10%",
-    },
-  ];
-
   const { auth } = usePage<SharedData>().props;
+  const [reservations, setReservations] = useState<any[]>([]);
+  const [discountCodes, setDiscountCodes] = useState<any[]>([]);
+  const [flexiblePriceOptions, setFlexiblePriceOptions] = useState<any[]>([]);
+  // const [bungalows, setBungalows] = useState<any[]>([]);
+  // const [amenities, setAmenities] = useState<any[]>([]);
+  // const [guests, setGuests] = useState<any[]>([]);
+
+  useEffect(() => {
+    api.get('/reservations').then(res => setReservations(res.data)).catch(console.error);
+    api.get('/discount-codes').then(res => setDiscountCodes(res.data)).catch(console.error);
+    api.get('/flexible-price-options').then(res => setFlexiblePriceOptions(res.data)).catch(console.error);  
+    // api.get('/bungalows').then(res => setBungalows(res.data)).catch(console.error);
+    // api.get('/amenities').then(res => setAmenities(res.data)).catch(console.error);
+    // api.get('/guests').then(res => setGuests(res.data)).catch(console.error);
+  }, []);
+
+  const recentReservations = reservations
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 3);
+
+  function formatDutchDate(dateString: string) {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('nl-NL', {
+      day: 'numeric',
+      month: 'long'
+    }).format(date);
+  }
+
+  const calculateReport = () => {
+  const confirmedReservations = reservations.filter(reserve => reserve.status === "confirmed");
+
+  const confirmedCount = confirmedReservations.length;
+  const profit = confirmedReservations.reduce(
+    (sum: number, a: { total_cost: any }) => sum + Number(a.total_cost),
+    0
+  );
+
+  return { confirmedCount, profit };
+};
 
   return (
     <>
@@ -104,7 +96,7 @@ export const Dashboard = (): JSX.Element => {
                     Omzet
                   </p>
                   <p className="font-semibold text-white text-[40px] mt-4">
-                    460,-
+                    {calculateReport().profit}
                   </p>
                 </CardContent>
               </Card>
@@ -113,7 +105,7 @@ export const Dashboard = (): JSX.Element => {
                   <p className="opacity-60 font-semibold text-white text-xl">
                     Boekingen
                   </p>
-                  <p className="font-semibold text-white text-[40px] mt-4">1</p>
+                  <p className="font-semibold text-white text-[40px] mt-4">{calculateReport().confirmedCount}</p>
                 </CardContent>
               </Card>
             </div>
@@ -142,39 +134,41 @@ export const Dashboard = (): JSX.Element => {
                   <TableHead className="font-semibold text-black text-sm">
                     Prijs
                   </TableHead>
-                  <TableHead className="font-semibold text-black text-sm">
+                  <TableHead className="font-semibold text-black text-sm text-right pr-20">
                     Status
                   </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recentBookings.map((booking, index) => (
+                {recentReservations.map((reservation, index) => (
                   <TableRow
                     key={index}
                     className="h-[81px] bg-white rounded-[10px]"
                   >
                     <TableCell className="opacity-60 font-normal text-black text-2xl">
-                      {booking.date}
+                      {new Date(reservation.created_at).toLocaleDateString('en-GB')}
                     </TableCell>
                     <TableCell className="opacity-60 font-normal text-black text-2xl">
-                      {booking.name}
+                      {reservation.guest.name}
                     </TableCell>
                     <TableCell className="opacity-60 font-normal text-black text-2xl">
-                      {booking.orderNumber}
+                      {reservation.id}
                     </TableCell>
                     <TableCell className="opacity-60 font-normal text-black text-2xl">
-                      {booking.checkInOut}
+                      {formatDutchDate(reservation.start_date)} / {formatDutchDate(reservation.end_date)}
                     </TableCell>
                     <TableCell className="opacity-60 font-normal text-black text-2xl">
-                      {booking.price}
+                      {reservation.total_cost}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="flex justify-end">
                       <Badge
                         className="w-[120px] h-12 rounded-[25px] flex items-center justify-center"
-                        style={{ backgroundColor: booking.statusColor }}
+                        style={{
+                          backgroundColor: reservation.status === 'pending' ? '#ff9800' : (reservation.status === 'confirmed' ? '#00a508' : '#a50500')
+                        }}
                       >
                         <span className="font-medium text-white text-sm">
-                          {booking.status}
+                          {reservation.status}
                         </span>
                       </Badge>
                     </TableCell>
@@ -206,7 +200,7 @@ export const Dashboard = (): JSX.Element => {
                   <TableHead className="font-semibold text-black text-sm">
                     Korting
                   </TableHead>
-                  <TableHead className="font-semibold text-black text-sm">
+                  <TableHead className="font-semibold text-black text-sm text-right pr-12">
                     Bewerken
                   </TableHead>
                 </TableRow>
@@ -218,15 +212,15 @@ export const Dashboard = (): JSX.Element => {
                     className="h-[81px] bg-white rounded-[10px]"
                   >
                     <TableCell className="opacity-60 font-normal text-black text-2xl">
-                      {code.date}
+                      {new Date(code.created_at).toLocaleDateString('en-GB')}
                     </TableCell>
                     <TableCell className="opacity-60 font-normal text-black text-2xl">
                       {code.code}
                     </TableCell>
                     <TableCell className="opacity-60 font-normal text-black text-2xl">
-                      {code.discount}
+                      {code.percentage}%
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="flex justify-end">
                       <div className="flex gap-2">
                         <Button
                           size="icon"
@@ -273,27 +267,27 @@ export const Dashboard = (): JSX.Element => {
                   <TableHead className="font-semibold text-black text-sm">
                     Korting
                   </TableHead>
-                  <TableHead className="font-semibold text-black text-sm">
+                  <TableHead className="font-semibold text-black text-sm text-right pr-12">
                     Bewerken
                   </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {flexiblePricing.map((option, index) => (
+                {flexiblePriceOptions.map((option, index) => (
                   <TableRow
                     key={index}
                     className="h-[81px] bg-white rounded-[10px]"
                   >
                     <TableCell className="opacity-60 font-normal text-black text-2xl">
-                      {option.period}
+                      {option.start_date} / {option.end_date}
                     </TableCell>
                     <TableCell className="opacity-60 font-normal text-black text-2xl">
-                      {option.name}
+                      {option.bungalow.name}
                     </TableCell>
                     <TableCell className="opacity-60 font-normal text-black text-2xl">
-                      {option.discount}
+                      {option.price_modifier}%
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="flex justify-end">
                       <div className="flex gap-2">
                         <Button
                           size="icon"
