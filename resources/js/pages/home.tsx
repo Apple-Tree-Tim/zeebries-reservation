@@ -84,7 +84,7 @@ export default function Home() {
           </header>
 
           <section className="mt-8 flex justify-center px-4 md:mt-16">
-            <Card className="relative h-[85px] w-full max-w-[900px] rounded-[65px] border-none bg-[#009416]">
+            <Card className="relative h-[85px] w-full max-w-[840px] rounded-[65px] border-none bg-[#009416]">
               <CardContent className="flex h-full items-center justify-between p-6 pl-12">
                 <div className="flex items-center space-x-6">
                   <div className="flex flex-col">
