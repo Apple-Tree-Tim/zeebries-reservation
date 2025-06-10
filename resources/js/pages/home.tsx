@@ -28,10 +28,11 @@ export default function Home() {
   const [search, setSearch] = useState('');
   const [persons, setPersons] = useState('');
   const [price, setPrice] = useState('');
-  const [date, setDate] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   const fetchBungalows = () => {
-    api.get('/bungalows', { params: { date } })
+    api.get('/bungalows', { params: { start_date: startDate, end_date: endDate } })
       .then(res => {
         const parsed = res.data.map((b: Bungalow) => ({
           ...b,
@@ -45,7 +46,13 @@ export default function Home() {
 
   useEffect(() => {
     fetchBungalows();
-  }, [date]);
+  }, []);
+
+  useEffect(() => {
+    if (startDate && endDate) {
+      fetchBungalows();
+    }
+  }, [startDate, endDate]);
 
   useEffect(() => {
     let data = [...bungalows];
@@ -77,18 +84,24 @@ export default function Home() {
           </header>
 
           <section className="mt-8 flex justify-center px-4 md:mt-16">
-            <Card className="relative h-[85px] w-full max-w-[795px] rounded-[65px] border-none bg-[#009416]">
+            <Card className="relative h-[85px] w-full max-w-[900px] rounded-[65px] border-none bg-[#009416]">
               <CardContent className="flex h-full items-center justify-between p-6 pl-12">
                 <div className="flex items-center space-x-6">
                   <div className="flex flex-col">
-                    <span className="text-[14px] font-semibold text-white">In/ uitchecken</span>
+                    <span className="text-[14px] font-semibold text-white text-center">Inchecken / uitchecken</span>
                     <div className="rounded">
                       <input
                         type="date"
-                        value={date}
-                        onChange={e => setDate(e.target.value)}
-                        placeholder="Datum"
-                        className="w-[130px] bg-transparent text-[14px] text-white placeholder-white/60 outline-none"
+                        value={startDate}
+                        onChange={e => setStartDate(e.target.value)}
+                        className="w-[93px] bg-transparent text-[14px] text-white placeholder-white/60 outline-none"
+                      />
+                      -
+                      <input
+                        type="date"
+                        value={endDate}
+                        onChange={e => setEndDate(e.target.value)}
+                        className="w-[93px] bg-transparent text-[14px] text-white placeholder-white/60 outline-none"
                       />
                     </div>
                   </div>

@@ -15,7 +15,27 @@ class BungalowController extends Controller
     {
         $query = Bungalow::with('amenities', 'flexiblePrices');
 
-        if ($date = $request->query('date')) {
+        $start = $request->query('start_date');
+        $end = $request->query('end_date');
+
+        if ($start && $end) {
+            try {
+                $startDate = Carbon::parse($start)->toDateString();
+            } catch (\Exception $e) {
+                $startDate = $start;
+            }
+
+            try {
+                $endDate = Carbon::parse($end)->toDateString();
+            } catch (\Exception $e) {
+                $endDate = $end;
+            }
+
+            $query->whereDoesntHave('reservationItems.reservation', function ($q) use ($startDate, $endDate) {
+                $q->where('start_date', '<=', $endDate)
+                  ->where('end_date', '>=', $startDate);
+            });
+        } elseif ($date = $request->query('date')) {
             try {
                 $parsed = Carbon::parse($date)->toDateString();
             } catch (\Exception $e) {
