@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { PencilIcon, PlusIcon, TrashIcon } from "lucide-react";
+import { PencilIcon, PlusIcon, TrashIcon, CheckIcon, XIcon } from "lucide-react";
 import React, { JSX, useEffect, useState } from "react";
 import { type SharedData } from '@/types';
 import { Head, usePage, Link } from '@inertiajs/react';
@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Switch } from "@/components/ui/switch";
 import api from '@/api';
 
 export const Dashboard = (): JSX.Element => {
@@ -22,6 +23,7 @@ export const Dashboard = (): JSX.Element => {
   const [discountCodes, setDiscountCodes] = useState<any[]>([]);
   const [flexiblePriceOptions, setFlexiblePriceOptions] = useState<any[]>([]);
   const [bungalows, setBungalows] = useState<any[]>([]);
+  const [dynamicPricing, setDynamicPricing] = useState(false);
   const [newBungalow, setNewBungalow] = useState({
     name: '',
     imageFile: null as File | null,
@@ -34,6 +36,13 @@ export const Dashboard = (): JSX.Element => {
   const [showForm, setShowForm] = useState(false);
   const [amenities, setAmenities] = useState<any[]>([]);
   const [selectedAmenities, setSelectedAmenities] = useState<number[]>([]);
+  const [editingDiscountId, setEditingDiscountId] = useState<number | null>(null);
+  const [addingDiscount, setAddingDiscount] = useState(false);
+  const [discountForm, setDiscountForm] = useState({ code: '', name: '', percentage: '' });
+
+  const [editingPriceId, setEditingPriceId] = useState<number | null>(null);
+  const [addingPriceOption, setAddingPriceOption] = useState(false);
+  const [priceForm, setPriceForm] = useState({ bungalow_id: '', price_modifier: '', start_date: '', end_date: '' });
   // const [guests, setGuests] = useState<any[]>([]);
 
   useEffect(() => {
@@ -42,6 +51,7 @@ export const Dashboard = (): JSX.Element => {
     api.get('/flexible-price-options').then(res => setFlexiblePriceOptions(res.data)).catch(console.error);
     api.get('/bungalows').then(res => setBungalows(res.data)).catch(console.error);
     api.get('/amenities').then(res => setAmenities(res.data)).catch(console.error);
+    api.get('/settings/dynamic-pricing').then(res => setDynamicPricing(res.data.dynamic_pricing)).catch(console.error);
     // api.get('/guests').then(res => setGuests(res.data)).catch(console.error);
   }, []);
 
@@ -68,6 +78,16 @@ export const Dashboard = (): JSX.Element => {
 
     return { confirmedCount, profit };
   };
+
+  const handleToggle = async (checked: boolean) => {
+    try {
+      // Default implementation if no onToggle provided
+      await api.put("/settings/dynamic-pricing", { dynamic_pricing: checked })
+      setDynamicPricing(checked)
+    } catch (error) {
+      console.error("Failed to update dynamic pricing setting:", error)
+    }
+  }
 
   return (
     <>
@@ -293,6 +313,9 @@ export const Dashboard = (): JSX.Element => {
                     Code
                   </TableHead>
                   <TableHead className="font-semibold text-black text-sm">
+                    Naam
+                  </TableHead>
+                  <TableHead className="font-semibold text-black text-sm">
                     Korting
                   </TableHead>
                   <TableHead className="font-semibold text-black text-sm text-right pr-12">
@@ -302,42 +325,174 @@ export const Dashboard = (): JSX.Element => {
               </TableHeader>
               <TableBody>
                 {discountCodes.map((code, index) => (
-                  <TableRow
-                    key={index}
-                    className="h-[81px] bg-white rounded-[10px]"
-                  >
+                  editingDiscountId === code.id ? (
+                    <TableRow key={index} className="h-[81px] bg-white rounded-[10px]">
+                      <TableCell className="opacity-60 font-normal text-black text-2xl">
+                        {new Date(code.created_at).toLocaleDateString('en-GB')}
+                      </TableCell>
+                      <TableCell className="opacity-60 font-normal text-black text-2xl">
+                        <input
+                          className="border p-1"
+                          value={discountForm.code}
+                          onChange={e => setDiscountForm({ ...discountForm, code: e.target.value })}
+                        />
+                      </TableCell>
+                      <TableCell className="opacity-60 font-normal text-black text-2xl">
+                        <input
+                          className="border p-1"
+                          value={discountForm.name}
+                          onChange={e => setDiscountForm({ ...discountForm, name: e.target.value })}
+                        />
+                      </TableCell>
+                      <TableCell className="opacity-60 font-normal text-black text-2xl">
+                        <input
+                          type="number"
+                          className="border p-1 w-20"
+                          value={discountForm.percentage}
+                          onChange={e => setDiscountForm({ ...discountForm, percentage: e.target.value })}
+                        />
+                      </TableCell>
+                      <TableCell className="flex justify-end">
+                        <div className="flex gap-2">
+                          <Button
+                            size="icon"
+                            onClick={async () => {
+                              await api.put(`/discount-codes/${code.id}`, {
+                                code: discountForm.code,
+                                name: discountForm.name,
+                                percentage: Number(discountForm.percentage)
+                              });
+                              const res = await api.get('/discount-codes');
+                              setDiscountCodes(res.data);
+                              setEditingDiscountId(null);
+                              setDiscountForm({ code: '', name: '', percentage: '' });
+                            }}
+                            className="w-12 h-12 rounded-3xl bg-[#009416] hover:bg-[#007812]"
+                          >
+                            <CheckIcon className="w-5 h-5 text-white" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            onClick={() => {
+                              setEditingDiscountId(null);
+                              setDiscountForm({ code: '', name: '', percentage: '' });
+                            }}
+                            className="w-12 h-12 rounded-3xl bg-[#a50500] hover:bg-[#940500]"
+                          >
+                            <XIcon className="w-5 h-5 text-white" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    <TableRow key={index} className="h-[81px] bg-white rounded-[10px]">
+                      <TableCell className="opacity-60 font-normal text-black text-2xl">
+                        {new Date(code.created_at).toLocaleDateString('en-GB')}
+                      </TableCell>
+                      <TableCell className="opacity-60 font-normal text-black text-2xl">
+                        {code.code}
+                      </TableCell>
+                      <TableCell className="opacity-60 font-normal text-black text-2xl">
+                        {code.name}
+                      </TableCell>
+                      <TableCell className="opacity-60 font-normal text-black text-2xl">
+                        {code.percentage}%
+                      </TableCell>
+                      <TableCell className="flex justify-end">
+                        <div className="flex gap-2">
+                          <Button
+                            size="icon"
+                            onClick={() => {
+                              setEditingDiscountId(code.id);
+                              setDiscountForm({ code: code.code, name: code.name, percentage: String(code.percentage) });
+                            }}
+                            className="w-12 h-12 rounded-3xl bg-[#ff9800] hover:bg-[#e68a00]"
+                          >
+                            <PencilIcon className="w-[18px] h-[18px] text-white" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            onClick={async () => {
+                              await api.delete(`/discount-codes/${code.id}`);
+                              const res = await api.get('/discount-codes');
+                              setDiscountCodes(res.data);
+                            }}
+                            className="w-12 h-12 rounded-3xl bg-[#a50500] hover:bg-[#940500]"
+                          >
+                            <TrashIcon className="w-5 h-5 text-white" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                ))}
+                {addingDiscount && (
+                  <TableRow className="h-[81px] bg-white rounded-[10px]">
+                    <TableCell className="opacity-60 font-normal text-black text-2xl">-</TableCell>
                     <TableCell className="opacity-60 font-normal text-black text-2xl">
-                      {new Date(code.created_at).toLocaleDateString('en-GB')}
+                      <input
+                        className="border p-1"
+                        value={discountForm.code}
+                        onChange={e => setDiscountForm({ ...discountForm, code: e.target.value })}
+                      />
                     </TableCell>
                     <TableCell className="opacity-60 font-normal text-black text-2xl">
-                      {code.code}
+                      <input
+                        className="border p-1"
+                        value={discountForm.name}
+                        onChange={e => setDiscountForm({ ...discountForm, name: e.target.value })}
+                      />
                     </TableCell>
                     <TableCell className="opacity-60 font-normal text-black text-2xl">
-                      {code.percentage}%
+                      <input
+                        type="number"
+                        className="border p-1 w-20"
+                        value={discountForm.percentage}
+                        onChange={e => setDiscountForm({ ...discountForm, percentage: e.target.value })}
+                      />
                     </TableCell>
                     <TableCell className="flex justify-end">
                       <div className="flex gap-2">
                         <Button
                           size="icon"
-                          className="w-12 h-12 rounded-3xl bg-[#ff9800] hover:bg-[#e68a00]"
+                          onClick={async () => {
+                            await api.post('/discount-codes', {
+                              code: discountForm.code,
+                              name: discountForm.name,
+                              percentage: Number(discountForm.percentage)
+                            });
+                            const res = await api.get('/discount-codes');
+                            setDiscountCodes(res.data);
+                            setAddingDiscount(false);
+                            setDiscountForm({ code: '', name: '', percentage: '' });
+                          }}
+                          className="w-12 h-12 rounded-3xl bg-[#009416] hover:bg-[#007812]"
                         >
-                          <PencilIcon className="w-[18px] h-[18px] text-white" />
+                          <CheckIcon className="w-5 h-5 text-white" />
                         </Button>
                         <Button
                           size="icon"
+                          onClick={() => {
+                            setAddingDiscount(false);
+                            setDiscountForm({ code: '', name: '', percentage: '' });
+                          }}
                           className="w-12 h-12 rounded-3xl bg-[#a50500] hover:bg-[#940500]"
                         >
-                          <TrashIcon className="w-5 h-5 text-white" />
+                          <XIcon className="w-5 h-5 text-white" />
                         </Button>
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
             <div className="flex justify-center mt-8">
               <Button
                 size="icon"
+                onClick={() => {
+                  setAddingDiscount(true);
+                  setDiscountForm({ code: '', name: '', percentage: '' });
+                }}
                 className="w-12 h-12 rounded-3xl bg-[#00a508] hover:bg-[#009407]"
               >
                 <PlusIcon className="w-6 h-6 text-white" />
@@ -369,47 +524,215 @@ export const Dashboard = (): JSX.Element => {
               </TableHeader>
               <TableBody>
                 {flexiblePriceOptions.map((option, index) => (
-                  <TableRow
-                    key={index}
-                    className="h-[81px] bg-white rounded-[10px]"
-                  >
+                  editingPriceId === option.id ? (
+                    <TableRow key={index} className="h-[81px] bg-white rounded-[10px]">
+                      <TableCell className="opacity-60 font-normal text-black text-2xl">
+                        <input
+                          type="date"
+                          className="border p-1"
+                          value={priceForm.start_date}
+                          onChange={e => setPriceForm({ ...priceForm, start_date: e.target.value })}
+                        />
+                        {' / '}
+                        <input
+                          type="date"
+                          className="border p-1"
+                          value={priceForm.end_date}
+                          onChange={e => setPriceForm({ ...priceForm, end_date: e.target.value })}
+                        />
+                      </TableCell>
+                      <TableCell className="opacity-60 font-normal text-black text-2xl">
+                        <select
+                          className="border p-1"
+                          value={priceForm.bungalow_id}
+                          onChange={e => setPriceForm({ ...priceForm, bungalow_id: e.target.value })}
+                        >
+                          <option value="">Selecteer</option>
+                          {bungalows.map((b: any) => (
+                            <option key={b.id} value={b.id}>{b.name}</option>
+                          ))}
+                        </select>
+                      </TableCell>
+                      <TableCell className="opacity-60 font-normal text-black text-2xl">
+                        <input
+                          type="number"
+                          className="border p-1 w-20"
+                          value={priceForm.price_modifier}
+                          onChange={e => setPriceForm({ ...priceForm, price_modifier: e.target.value })}
+                        />
+                      </TableCell>
+                      <TableCell className="flex justify-end">
+                        <div className="flex gap-2">
+                          <Button
+                            size="icon"
+                            onClick={async () => {
+                              await api.put(`/flexible-price-options/${option.id}`, {
+                                bungalow_id: Number(priceForm.bungalow_id),
+                                price_modifier: Number(priceForm.price_modifier),
+                                start_date: priceForm.start_date,
+                                end_date: priceForm.end_date
+                              });
+                              const res = await api.get('/flexible-price-options');
+                              setFlexiblePriceOptions(res.data);
+                              setEditingPriceId(null);
+                              setPriceForm({ bungalow_id: '', price_modifier: '', start_date: '', end_date: '' });
+                            }}
+                            className="w-12 h-12 rounded-3xl bg-[#009416] hover:bg-[#007812]"
+                          >
+                            <CheckIcon className="w-5 h-5 text-white" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            onClick={() => {
+                              setEditingPriceId(null);
+                              setPriceForm({ bungalow_id: '', price_modifier: '', start_date: '', end_date: '' });
+                            }}
+                            className="w-12 h-12 rounded-3xl bg-[#a50500] hover:bg-[#940500]"
+                          >
+                            <XIcon className="w-5 h-5 text-white" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    <TableRow key={index} className="h-[81px] bg-white rounded-[10px]">
+                      <TableCell className="opacity-60 font-normal text-black text-2xl">
+                        {option.start_date} / {option.end_date}
+                      </TableCell>
+                      <TableCell className="opacity-60 font-normal text-black text-2xl">
+                        {option.bungalow.name}
+                      </TableCell>
+                      <TableCell className="opacity-60 font-normal text-black text-2xl">
+                        {option.price_modifier}%
+                      </TableCell>
+                      <TableCell className="flex justify-end">
+                        <div className="flex gap-2">
+                          <Button
+                            size="icon"
+                            onClick={() => {
+                              setEditingPriceId(option.id);
+                              setPriceForm({
+                                bungalow_id: String(option.bungalow_id),
+                                price_modifier: String(option.price_modifier),
+                                start_date: option.start_date,
+                                end_date: option.end_date
+                              });
+                            }}
+                            className="w-12 h-12 rounded-3xl bg-[#ff9800] hover:bg-[#e68a00]"
+                          >
+                            <PencilIcon className="w-[18px] h-[18px] text-white" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            onClick={async () => {
+                              await api.delete(`/flexible-price-options/${option.id}`);
+                              const res = await api.get('/flexible-price-options');
+                              setFlexiblePriceOptions(res.data);
+                            }}
+                            className="w-12 h-12 rounded-3xl bg-[#a50500] hover:bg-[#940500]"
+                          >
+                            <TrashIcon className="w-5 h-5 text-white" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                ))}
+                {addingPriceOption && (
+                  <TableRow className="h-[81px] bg-white rounded-[10px]">
                     <TableCell className="opacity-60 font-normal text-black text-2xl">
-                      {option.start_date} / {option.end_date}
+                      <input
+                        type="date"
+                        className="border p-1"
+                        value={priceForm.start_date}
+                        onChange={e => setPriceForm({ ...priceForm, start_date: e.target.value })}
+                      />
+                      {' / '}
+                      <input
+                        type="date"
+                        className="border p-1"
+                        value={priceForm.end_date}
+                        onChange={e => setPriceForm({ ...priceForm, end_date: e.target.value })}
+                      />
                     </TableCell>
                     <TableCell className="opacity-60 font-normal text-black text-2xl">
-                      {option.bungalow.name}
+                      <select
+                        className="border p-1"
+                        value={priceForm.bungalow_id}
+                        onChange={e => setPriceForm({ ...priceForm, bungalow_id: e.target.value })}
+                      >
+                        <option value="">Selecteer</option>
+                        {bungalows.map((b: any) => (
+                          <option key={b.id} value={b.id}>{b.name}</option>
+                        ))}
+                      </select>
                     </TableCell>
                     <TableCell className="opacity-60 font-normal text-black text-2xl">
-                      {option.price_modifier}%
+                      <input
+                        type="number"
+                        className="border p-1 w-20"
+                        value={priceForm.price_modifier}
+                        onChange={e => setPriceForm({ ...priceForm, price_modifier: e.target.value })}
+                      />
                     </TableCell>
                     <TableCell className="flex justify-end">
                       <div className="flex gap-2">
                         <Button
                           size="icon"
-                          className="w-12 h-12 rounded-3xl bg-[#ff9800] hover:bg-[#e68a00]"
+                          onClick={async () => {
+                            await api.post('/flexible-price-options', {
+                              bungalow_id: Number(priceForm.bungalow_id),
+                              price_modifier: Number(priceForm.price_modifier),
+                              start_date: priceForm.start_date,
+                              end_date: priceForm.end_date
+                            });
+                            const res = await api.get('/flexible-price-options');
+                            setFlexiblePriceOptions(res.data);
+                            setAddingPriceOption(false);
+                            setPriceForm({ bungalow_id: '', price_modifier: '', start_date: '', end_date: '' });
+                          }}
+                          className="w-12 h-12 rounded-3xl bg-[#009416] hover:bg-[#007812]"
                         >
-                          <PencilIcon className="w-[18px] h-[18px] text-white" />
+                          <CheckIcon className="w-[18px] h-[18px] text-white" />
                         </Button>
                         <Button
                           size="icon"
+                          onClick={() => {
+                            setAddingPriceOption(false);
+                            setPriceForm({ bungalow_id: '', price_modifier: '', start_date: '', end_date: '' });
+                          }}
                           className="w-12 h-12 rounded-3xl bg-[#a50500] hover:bg-[#940500]"
                         >
-                          <TrashIcon className="w-5 h-5 text-white" />
+                          <XIcon className="w-5 h-5 text-white" />
                         </Button>
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
             <div className="flex justify-center mt-8">
               <Button
                 size="icon"
+                onClick={() => {
+                  setAddingPriceOption(true);
+                  setPriceForm({ bungalow_id: '', price_modifier: '', start_date: '', end_date: '' });
+                }}
                 className="w-12 h-12 rounded-3xl bg-[#00a508] hover:bg-[#009407]"
               >
                 <PlusIcon className="w-6 h-6 text-white" />
               </Button>
             </div>
+          </section>
+
+          <section className="flex items-center justify-between mt-16 px-40">
+            <div className="space-y-0.5">
+              <h3 className="text-lg font-medium text-gray-900">Dynamische prijzen</h3>
+              <p className="text-sm text-gray-500">
+                Wanneer boekingen laag &gt; prijzen omlaag, wanneer boekingen hoog &gt; prijze omhoog
+              </p>
+            </div>
+            <Switch checked={dynamicPricing} onCheckedChange={handleToggle} className="data-[state=checked]:bg-green-500 h-10 w-18" />
           </section>
         </div>
       </div>
