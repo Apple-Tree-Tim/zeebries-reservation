@@ -1,9 +1,10 @@
-import { Head, useForm, Link, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
 import { type SharedData } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Toaster, toast } from 'sonner';
 
 type LoginForm = {
     email: string;
@@ -21,6 +22,8 @@ export default function Login() {
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
         post(route('login'), {
+            onSuccess: () => toast.success('Succesvol ingelogd!'),
+            onError: () => toast.error('Inloggen mislukt. Controleer uw gegevens.'),
             onFinish: () => reset('password'),
         });
     };
@@ -29,6 +32,7 @@ export default function Login() {
 
     return (
         <>
+            <Toaster position="top-right" richColors />
             <Head title="Log in" />
             <main className="bg-neutral-50 flex flex-row justify-center w-full">
                 <div className="bg-neutral-50 w-full max-w-[1440px] min-h-screen relative py-16">
